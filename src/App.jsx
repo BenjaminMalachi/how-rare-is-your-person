@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import DoubleRangeSlider from './components/DoubleRangeSlider';
+import './components/DoubleRangeSlider.css';
+import Checkbox from './components/Checkbox';
+import RadioGroup from './components/RadioGroup';
+import Slider from './components/Slider';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [ageRange, setAgeRange] = useState([0, 90]); // Default age range
+  const [sex, setSex] = useState({ male: false, female: false });
+  const [race, setRace] = useState({
+    malays: false,
+    chinese: false,
+    indians: false,
+    other: false,
+    doesNotMatter: true, // Default to does not matter
+  });
+  const [height, setHeight] = useState(150); // Default minimum height
+  const [income, setIncome] = useState(20000); // Default minimum income
+  const [maritalStatus, setMaritalStatus] = useState('doesNotMatter'); // Default marital status
+  const [householdType, setHouseholdType] = useState({
+    hdb: false,
+    condo: false,
+    landed: false,
+    doesNotMatter: true, // Default to does not matter
+  });
+  const [location, setLocation] = useState({
+    north: false,
+    south: false,
+    east: false,
+    west: false,
+    central: false,
+    doesNotMatter: true, // Default to does not matter
+  });
+  const [qualification, setQualification] = useState('doesNotMatter'); // Default qualification
+  const [physicallyActive, setPhysicallyActive] = useState('doesNotMatter'); // Default physical activity
+  const [religion, setReligion] = useState({
+    noReligion: false,
+    buddhism: false,
+    taoism: false,
+    islam: false,
+    hinduism: false,
+    sikhism: false,
+    catholic: false,
+    christian: false,
+    doesNotMatter: true, // Default to does not matter
+  });
+  const [size, setSize] = useState(2); // Default size, visible only if male is selected
+
+  // ... Rest of the component with functions to handle changes, submit, etc.
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <DoubleRangeSlider
+      min={0}
+      max={90}
+      onChange={({ min, max }) => console.log(`min = ${min}, max = ${max}`)}
+    />
+      {/* Repeat for other inputs, making sure to pass the right props */}
+      {/* ... */}
+    </div>
+  );
 }
 
-export default App
+export default App;
