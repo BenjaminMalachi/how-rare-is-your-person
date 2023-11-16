@@ -1,0 +1,85 @@
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: auto; /* Adjust based on your layout */
+    width: 100%; /* This will make it responsive to the parent container's width */
+    margin: 20px 0; /* Give some space above and below the slider */
+}
+
+.slider-label {
+    margin-bottom: 20px; /* Space between label and slider, adjust if needed */
+    text-align: center;
+    color: #ffffff; /* Color of the text */
+}
+
+.slider-input {
+    -webkit-appearance: none;
+    width: 80%;
+    height: 5px;
+    background: #ced4da; /* Match with .slider__track background color */
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+    margin: 0 auto; /* Center the slider */
+}
+
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background-color: #f1f5f7; /* Match with .thumb background color */
+    border: none;
+    border-radius: 50%; /* Match with .thumb border-radius */
+    box-shadow: 0 0 1px 1px #ced4da; /* Match with .thumb box-shadow */
+    cursor: pointer;
+    height: 18px; /* Match with .thumb height */
+    width: 18px; /* Match with .thumb width */
+    margin-top: -7px; /* Adjust if necessary */
+    position: relative;
+}
+
+.slider-input::-moz-range-thumb {
+    background-color: #f1f5f7; /* Match with .thumb background color */
+    border: none;
+    border-radius: 50%; /* Match with .thumb border-radius */
+    box-shadow: 0 0 1px 1px #ced4da; /* Match with .thumb box-shadow */
+    cursor: pointer;
+    height: 18px; /* Match with .thumb height */
+    width: 18px; /* Match with .thumb width */
+    position: relative;
+}
+
+/* Styles for the slider thumb for Chrome, Safari, and newer versions of Edge */
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background: #f1f5f7;
+    /* other styles for the thumb */
+}
+  
+.slider-input::-moz-range-thumb {
+    background: #f1f5f7;
+}
+  
+.slider-input::-ms-thumb {
+    background: #f1f5f7;
+}
+  
+ .slider-input::-webkit-slider-runnable-track {
+    background: #ced4da;
+}
+  
+.slider-input::-moz-range-track {
+    background: #ced4da;
+}
+  
+.slider-input::-ms-track {
+    background: #ced4da;
+}
+  
+.slider-input::-moz-range-progress {
+    background: #9fe5e1;
+}
+  
+.slider-input::-ms-fill-lower {
+    background: #9fe5e1;
+}

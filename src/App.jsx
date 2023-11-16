@@ -17,7 +17,6 @@ function App() {
   });
   const [height, setHeight] = useState(150); // Default minimum height
   const [income, setIncome] = useState(20000); // Default minimum income
-  const [maritalStatus, setMaritalStatus] = useState('doesNotMatter'); // Default marital status
   const [householdType, setHouseholdType] = useState({
     hdb: false,
     condo: false,
@@ -49,16 +48,65 @@ function App() {
 
   // ... Rest of the component with functions to handle changes, submit, etc.
 
+  const handleRaceChange = (event) => {
+    const { name, checked } = event.target;
+    setRace({ ...race, [name]: checked });
+  };
+
   return (
-    <div className="App">
-      <DoubleRangeSlider
-      min={0}
-      max={90}
-      onChange={({ min, max }) => console.log(`min = ${min}, max = ${max}`)}
-    />
-      {/* Repeat for other inputs, making sure to pass the right props */}
-      {/* ... */}
+    <main>
+      <div className="App">
+        <DoubleRangeSlider
+        label="Age Range"
+        min={0}
+        max={90}
+        onChange={({ min, max }) => console.log(`min = ${min}, max = ${max}`)}
+      />
+      </div>
+      <div className="App">
+      <Slider
+        label="Min Height"
+        min={100}
+        max={200}
+        value={height}
+        step={1}
+        onChange={setHeight}
+      />
     </div>
+    <div className="checkbox-container">
+        <h2>Race ?</h2>
+        <Checkbox
+          label="Malays"
+          name="malays"
+          checked={race.malays}
+          onChange={handleRaceChange}
+        />
+        <Checkbox
+          label="Chinese"
+          name="chinese"
+          checked={race.chinese}
+          onChange={handleRaceChange}
+        />
+        <Checkbox
+          label="Indians"
+          name="indians"
+          checked={race.indians}
+          onChange={handleRaceChange}
+        />
+        <Checkbox
+          label="Other"
+          name="other"
+          checked={race.other}
+          onChange={handleRaceChange}
+        />
+        <Checkbox
+          label="Does Not Matter"
+          name="doesNotMatter"
+          checked={race.doesNotMatter}
+          onChange={handleRaceChange}
+        />
+      </div>
+    </main>
   );
 }
 

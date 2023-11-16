@@ -1,9 +1,10 @@
 import React from 'react';
+import './Slider.css';
 
 export const Slider = ({ label, min, max, value, step, onChange }) => {
   return (
-    <div>
-      <label>{label}: {value >= max ? `> ${max}` : value}</label>
+    <div className="slider-container">
+      <label className="slider-label">{label}: {value >= max ? `> ${max} cm` : `${value} cm`}</label>
       <input
         type="range"
         min={min}

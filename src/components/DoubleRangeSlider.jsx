@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import './DoubleRangeSlider.css';
 
-const DoubleRangeSlider = ({ min, max, onChange }) => {
+const DoubleRangeSlider = ({ min, max, onChange, label }) => {
   const [minVal, setMinVal] = useState(min);
   const [maxVal, setMaxVal] = useState(max);
   const minValRef = useRef(min);
@@ -43,6 +43,7 @@ const DoubleRangeSlider = ({ min, max, onChange }) => {
 
   return (
     <div className="container">
+      {label && <label className="slider__label">{label}: {minVal} - {maxVal >= max ? `> ${max}` : maxVal}</label>}
       <input
         type="range"
         min={min}
@@ -80,6 +81,7 @@ const DoubleRangeSlider = ({ min, max, onChange }) => {
 };
 
 DoubleRangeSlider.propTypes = {
+  label: PropTypes.string,
   min: PropTypes.number.isRequired,
   max: PropTypes.number.isRequired,
   onChange: PropTypes.func.isRequired

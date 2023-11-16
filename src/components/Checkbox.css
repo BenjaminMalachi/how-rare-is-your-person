@@ -1,0 +1,8 @@
+.checkbox-container {
+    display: flex;
+    flex-direction: column; /* Stack checkboxes vertically */
+    align-items: center; /* Center checkboxes horizontally */
+    justify-content: center; /* Center checkboxes vertically if container has a specific height */
+    width: 100%; /* Take the full width of the parent container */
+  }
+  
