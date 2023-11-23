@@ -1,0 +1,24 @@
+.radio-group-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center-align items horizontally */
+    justify-content: center; /* Center-align items vertically if needed */
+    width: 100%; /* Adjust width as needed */
+    margin: 20px 0; /* Space above and below the radio group */
+  }
+  
+  .radio-group-legend {
+    margin-bottom: 10px; /* Space between legend and radio buttons */
+    text-align: center;
+    color: #ffffff; /* Adjust the color as needed */
+  }
+  
+  .radio-label {
+    margin: 5px 0; /* Space between each radio button */
+    /* Additional styles for the label if needed */
+  }
+  
+  .radio-input {
+    /* Styles for the radio input if you want to customize it */
+  }
+  

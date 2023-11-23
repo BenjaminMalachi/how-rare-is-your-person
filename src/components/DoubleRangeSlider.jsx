@@ -8,6 +8,8 @@ const DoubleRangeSlider = ({ min, max, onChange, label }) => {
   const minValRef = useRef(min);
   const maxValRef = useRef(max);
   const range = useRef(null);
+  const previousMinVal = useRef(minVal);
+  const previousMaxVal = useRef(maxVal);
 
   // Convert to percentage
   const getPercent = useCallback(
@@ -38,7 +40,11 @@ const DoubleRangeSlider = ({ min, max, onChange, label }) => {
 
   // Get min and max values when their state changes
   useEffect(() => {
-    onChange({ min: minVal, max: maxVal });
+    if (minVal !== previousMinVal.current || maxVal !== previousMaxVal.current) {
+      onChange(minVal, maxVal);
+      previousMinVal.current = minVal;
+      previousMaxVal.current = maxVal;
+    }
   }, [minVal, maxVal, onChange]);
 
   return (
@@ -51,6 +57,7 @@ const DoubleRangeSlider = ({ min, max, onChange, label }) => {
         value={minVal}
         onChange={(event) => {
           const value = Math.min(Number(event.target.value), maxVal - 1);
+          //console.log(`Min Value Changed: ${value}`); // Add this line for logging
           setMinVal(value);
           minValRef.current = value;
         }}
@@ -64,6 +71,7 @@ const DoubleRangeSlider = ({ min, max, onChange, label }) => {
         value={maxVal}
         onChange={(event) => {
           const value = Math.max(Number(event.target.value), minVal + 1);
+          //console.log(`Max Value Changed: ${value}`); // Add this line for logging
           setMaxVal(value);
           maxValRef.current = value;
         }}
