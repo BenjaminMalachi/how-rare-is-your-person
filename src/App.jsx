@@ -5,8 +5,9 @@ import Checkbox from './components/Checkbox';
 import RadioGroup from './components/RadioGroup';
 import Slider from './components/Slider';
 import axios from 'axios';
-import { calculateProbability } from './calculateProbability';
+import { calculateDemographicProbability, calculateIncomeProbability } from './util/calculateProbability';
 import { findAllMatchingAgeCategories, ageCategoryMapping } from './util/AgeSexRaceDataHandler';
+import { findIncomeCategory } from './util/IncomeDataHandler';
 
 function App() {
   const [ageRange, setAgeRange] = useState([0, 90]); // Default age range
@@ -19,7 +20,8 @@ function App() {
     doesNotMatter: true, // Default to does not matter
   });
   const [height, setHeight] = useState(150); // Default minimum height
-  const [income, setIncome] = useState(20000); // Default minimum income
+  const [incomeData, setIncomeData] = useState(null);
+  const [income, setIncome] = useState(20000);
   const [householdType, setHouseholdType] = useState({
     hdb: false,
     condo: false,
@@ -111,7 +113,7 @@ function App() {
       const totalPopulationValue = data[totalPopulationSeriesNumber]?.value;
       
       if (totalPopulationValue) {
-        const probability = calculateProbability(relevantData, totalPopulationValue);
+        const probability = calculateDemographicProbability (relevantData, totalPopulationValue);
         totalProbability += parseFloat(probability); // Sum the probabilities
       } else {
         console.error("Total population data is missing or invalid.");
@@ -121,9 +123,28 @@ function App() {
     }
   });
 
-  setProbabilityResult(totalProbability.toFixed(2)); // Set the summed probability
+  const incomeCategory = findIncomeCategory(income, incomeData.brackets);
+if (incomeCategory) {
+    const incomeValue = parseInt(incomeData.brackets[incomeCategory]?.value, 10) || 0;
+    const totalIncomePopulation = parseInt(incomeData.total, 10); // Use .total here
+    console.log('Income Category Key:', incomeCategory);
+    console.log('Total Income Data:', incomeData.total);
+    const incomeProbability = calculateIncomeProbability(incomeValue, totalIncomePopulation);
+
+    // Combine the probabilities
+    console.log('totalProbability ', totalProbability);
+    console.log('incomeProbability ', incomeProbability);
+    console.log('Income Value:', incomeValue);
+    console.log('Total Income Population:', totalIncomePopulation);
+    const combinedProbability = totalProbability * incomeProbability;
+    console.log('combinedProbability ', combinedProbability);
+    setProbabilityResult(combinedProbability.toFixed(4)); // Set the combined probability
+} else {
+    console.error("Income category not found");
+}
 };
 
+  // Age Sex Race Parse Data
   const parseData = (rows) => {
     let parsedData = {};
     rows.forEach(row => {
@@ -143,6 +164,24 @@ function App() {
     return parsedData;
   };
 
+  //Income Parse Data
+  function parseIncomeData(rows) {
+    let parsedData = { brackets: {} };
+    rows.forEach(row => {
+      if (row.seriesNo === "2") {
+        parsedData["total"] = row.columns[0].value; // Capture the total population
+      } else if (row.seriesNo.startsWith("2.")) { // Check if the seriesNo indicates an income bracket
+        const bracketKey = row.seriesNo;
+        const value = row.columns[0].value;
+        parsedData.brackets[bracketKey] = {
+          range: row.rowText,
+          value: value,
+        };
+      }
+    });
+    return parsedData;
+  }
+
   // Axios
 
   const [data, setData] = useState(null);
@@ -151,6 +190,7 @@ function App() {
 
   useEffect(() => {
     setIsLoading(true);
+    // Fetch Age Sex Race
     axios.get('https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810011',{params: {
       timeFilter: 2023
     },})
@@ -166,6 +206,24 @@ function App() {
       })
       .finally(() => {
         setIsLoading(false);
+      });
+
+      // Fetch Income
+      axios.get('https://tablebuilder.singstat.gov.sg/api/table/tabledata/M130221', {
+        params: {
+          timeFilter: 2021
+        }
+      })
+      .then(response => {
+        // Process and save the income data similarly to how you're handling the other data
+        const incomeData = parseIncomeData(response.data.Data.row);
+        console.log('Processed income data:', incomeData);
+        // Save the parsed data to state
+        setIncomeData(incomeData);
+      })
+      .catch(error => {
+        // Handle any errors here
+        console.error('Error fetching income data:', error);
       });
   }, []); // Empty array ensures this runs once on mount only
   
@@ -235,6 +293,21 @@ function App() {
           checked={race.doesNotMatter}
           onChange={handleRaceChange}
         />
+      </div>
+      <div className="App">
+        <label htmlFor="incomeSlider">Select Yearly Income:</label>
+        <input
+          id="incomeSlider"
+          type="range"
+          min="20000"
+          max="1000000"
+          step={10000}
+          value={income}
+          onChange={(e) => setIncome(Number(e.target.value))}
+        />
+        <div>
+          Selected Income: ${income.toLocaleString()}
+        </div>
       </div>
       <button onClick={handleCalculateProbability}>Calculate Probability</button>
       <div className="probability-result">
