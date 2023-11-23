@@ -1,0 +1,15 @@
+meta {
+  name: Income
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://tablebuilder.singstat.gov.sg/api/table/tabledata/M130221?timeFilter=2021
+  body: none
+  auth: none
+}
+
+query {
+  timeFilter: 2021
+}
