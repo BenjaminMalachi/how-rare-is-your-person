@@ -18,11 +18,13 @@ const incomeBrackets = {
   };
   
   export const findIncomeCategory = (income) => {
-    for (const [key, range] of Object.entries(incomeBrackets)) {
-      if (income >= range.min && income <= range.max) {
-        return key;
+    let categories = [];
+  
+    Object.entries(incomeBrackets).forEach(([key, range]) => {
+      if (income <= range.min || income <= range.max) {
+        categories.push(key); // Include this category as it's above the selected income
       }
-    }
-    // Handle the case where income does not fit into any category
-    return null;
+    });
+  
+    return categories; // This will be an array of all categories at and above the selected income
   };

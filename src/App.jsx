@@ -5,9 +5,11 @@ import Checkbox from './components/Checkbox';
 import RadioGroup from './components/RadioGroup';
 import Slider from './components/Slider';
 import axios from 'axios';
-import { calculateDemographicProbability, calculateIncomeProbability } from './util/calculateProbability';
+import { calculateDemographicProbability, calculateIncomeProbability, calculateCombinedProbability } from './util/calculateProbability';
 import { findAllMatchingAgeCategories, ageCategoryMapping } from './util/AgeSexRaceDataHandler';
 import { findIncomeCategory } from './util/IncomeDataHandler';
+import { calculateHeightProbability } from './util/HeightDataHandler';
+import './App.css';
 
 function App() {
   const [ageRange, setAgeRange] = useState([0, 90]); // Default age range
@@ -51,6 +53,7 @@ function App() {
   });
   const [size, setSize] = useState(2); // Default size, visible only if male is selected
   const [probabilityResult, setProbabilityResult] = useState("");
+  const [actualFigure, setActualFigure] = useState(0);
 
   // ... Rest of the component with functions to handle changes, submit, etc.
 
@@ -62,11 +65,22 @@ function App() {
 
   const handleRaceChange = (event) => {
     const { name, checked } = event.target;
-    setRace((prevRace) => ({
-      ...prevRace,
-      [name]: checked,
-      doesNotMatter: false, // Reset 'does not matter' if other options are selected
-    }));
+    // If "Does Not Matter" is checked, uncheck all others. If another box is checked, uncheck "Does Not Matter".
+    const resetState = name === 'doesNotMatter'
+      ? {
+          malays: false,
+          chinese: false,
+          indians: false,
+          other: false,
+          doesNotMatter: checked,
+        }
+      : {
+          ...race,
+          [name]: checked,
+          doesNotMatter: false,
+        };
+  
+    setRace(resetState);
   };
 
   const handleSexChange = (event) => {
@@ -76,73 +90,109 @@ function App() {
   const handleCalculateProbability = () => {
     const selectedRaces = Object.keys(race).filter(key => race[key] && key !== 'doesNotMatter');
     let raceKeys = [];
-  
+    let demographicProbability = 0;
+    let incomeProbability = 1; // Default to 1 in case there's no income data
+    let heightProbability = 1; // Default to 1 in case there's no height data
+    let relevantData = [];
+    let totalPopulationValue = 0;
+    let totalProbability = 0;
+
+    console.log('sex:', sex);
+
     if (race.doesNotMatter && sex === "doesNotMatter") {
       raceKeys = ["Total Residents"];
+    } else if (race.doesNotMatter) {
+      // If the sex is not 'doesNotMatter', add the specific sex total key with "Residents"
+      raceKeys = [`Total ${sex.charAt(0).toUpperCase() + sex.slice(1)} Residents`];
     } else {
-      if (sex !== "doesNotMatter") {
-        selectedRaces.forEach(raceName => {
+      // Here you handle the case where specific races are selected
+      selectedRaces.forEach(raceName => {
+        if (sex !== "doesNotMatter") {
           if (raceName === 'other') {
             raceKeys.push(`Other Ethnic Groups (${sex.charAt(0).toUpperCase() + sex.slice(1)})`);
           } else {
             raceKeys.push(`Total ${sex.charAt(0).toUpperCase() + sex.slice(1)} ${raceName.charAt(0).toUpperCase() + raceName.slice(1)}`);
           }
-        });
-      } else {
-        selectedRaces.forEach(raceName => {
+        } else {
+          // If the sex is 'doesNotMatter', you add the total key for each race
           if (raceName === 'other') {
             raceKeys.push("Other Ethnic Groups (Total)");
           } else {
             raceKeys.push(`Total ${raceName.charAt(0).toUpperCase() + raceName.slice(1)}`);
           }
+        }
+      });
+    }
+
+    console.log('raceKeys:', raceKeys);
+    console.log('data: ', data);
+
+    Object.values(data).forEach(segment => {
+      if (segment.rows && Array.isArray(segment.rows)) {
+        segment.rows.forEach(row => {
+          if (row.value) {
+            totalPopulationValue += parseInt(row.value, 10);
+          }
         });
       }
-    }
-  
-    let totalProbability = 0; // Initialize a variable to hold the sum of probabilities
-  
-  raceKeys.forEach(raceKey => {
-    const matchingCategories = findAllMatchingAgeCategories(ageRange, ageCategoryMapping);
-    const seriesNumber = Object.keys(data).find(key => data[key].labelSexRace.includes(raceKey));
-    const totalPopulationSeriesNumber = Object.keys(data).find(key => data[key].labelSexRace === "Total Residents");
+    });
     
-    if (seriesNumber && totalPopulationSeriesNumber) {
-      const relevantData = matchingCategories.flatMap(category => {
-        return data[seriesNumber]?.rows.filter(row => row.label === category);
-      });
-      const totalPopulationValue = data[totalPopulationSeriesNumber]?.value;
+    
+    raceKeys.forEach(raceKey => {
+      const matchingCategories = findAllMatchingAgeCategories(ageRange, ageCategoryMapping);
+      const seriesNumber = Object.keys(data).find(key => data[key].labelSexRace.includes(raceKey));
       
-      if (totalPopulationValue) {
-        const probability = calculateDemographicProbability (relevantData, totalPopulationValue);
-        totalProbability += parseFloat(probability); // Sum the probabilities
+      if (seriesNumber) {
+        relevantData = matchingCategories.flatMap(category => {
+          return data[seriesNumber]?.rows.filter(row => row.label === category);
+        });
+      
+        demographicProbability += calculateDemographicProbability(relevantData, totalPopulationValue);
+        totalProbability += parseFloat(demographicProbability); // Sum the probabilities
       } else {
-        console.error("Total population data is missing or invalid.");
+        console.error("Series number for the selected categories could not be determined.");
+      }
+    
+      console.log('Total Probability:', totalProbability);
+      console.log('relevantData:', relevantData);
+      console.log('Total Population Value:', totalPopulationValue);
+      console.log('Demographic Probability:', demographicProbability);
+    });
+
+    // Calculate income probability if income data is available
+    if (incomeData) {
+      const incomeCategories = findIncomeCategory(income, incomeData.brackets);
+      console.log('Income Categories:', incomeCategories);
+      if (incomeCategories) {
+        // Instead of calculating here, we'll call the utility function
+        incomeProbability = calculateIncomeProbability(incomeCategories, incomeData);
+        console.log('Income Probability:', incomeProbability);
+      } else {
+        console.error("Income category not found");
       }
     } else {
-      console.error("Series number for the selected categories could not be determined.");
+      console.error("Income data is not available");
     }
-  });
 
-  const incomeCategory = findIncomeCategory(income, incomeData.brackets);
-if (incomeCategory) {
-    const incomeValue = parseInt(incomeData.brackets[incomeCategory]?.value, 10) || 0;
-    const totalIncomePopulation = parseInt(incomeData.total, 10); // Use .total here
-    console.log('Income Category Key:', incomeCategory);
-    console.log('Total Income Data:', incomeData.total);
-    const incomeProbability = calculateIncomeProbability(incomeValue, totalIncomePopulation);
 
-    // Combine the probabilities
-    console.log('totalProbability ', totalProbability);
-    console.log('incomeProbability ', incomeProbability);
-    console.log('Income Value:', incomeValue);
-    console.log('Total Income Population:', totalIncomePopulation);
-    const combinedProbability = totalProbability * incomeProbability;
-    console.log('combinedProbability ', combinedProbability);
-    setProbabilityResult(combinedProbability.toFixed(4)); // Set the combined probability
-} else {
-    console.error("Income category not found");
-}
-};
+    // Calculate height probability
+    heightProbability = calculateHeightProbability(height, sex);
+    console.log('Height Probability:', heightProbability);
+
+    // Combine the probabilities using the calculateCombinedProbability function
+    const combinedProbability = calculateCombinedProbability(demographicProbability, incomeProbability, heightProbability);
+
+    console.log('Combined Probability:', combinedProbability);
+
+    const calculatedActualFigure = combinedProbability * totalPopulationValue;
+    console.log('Calculated Actual Figure:', calculatedActualFigure); 
+    setActualFigure(calculatedActualFigure.toFixed(0)); // Store the actual figure
+
+    // Set the combined probability
+    setProbabilityResult((combinedProbability * 100).toFixed(4));
+    console.log('Actual Figure State:', actualFigure);
+    console.log('Probability Result State:', probabilityResult);
+  };
 
   // Age Sex Race Parse Data
   const parseData = (rows) => {
@@ -217,7 +267,6 @@ if (incomeCategory) {
       .then(response => {
         // Process and save the income data similarly to how you're handling the other data
         const incomeData = parseIncomeData(response.data.Data.row);
-        console.log('Processed income data:', incomeData);
         // Save the parsed data to state
         setIncomeData(incomeData);
       })
@@ -295,24 +344,25 @@ if (incomeCategory) {
         />
       </div>
       <div className="App">
-        <label htmlFor="incomeSlider">Select Yearly Income:</label>
-        <input
-          id="incomeSlider"
-          type="range"
-          min="20000"
-          max="1000000"
+        <Slider
+          label="Select Yearly Income"
+          min={20000}
+          max={1000000}
           step={10000}
           value={income}
-          onChange={(e) => setIncome(Number(e.target.value))}
+          onChange={(newValue) => setIncome(newValue)}
+          formatLabel={(value) => `$${value.toLocaleString()}`}
         />
-        <div>
-          Selected Income: ${income.toLocaleString()}
-        </div>
       </div>
       <button onClick={handleCalculateProbability}>Calculate Probability</button>
       <div className="probability-result">
-      {probabilityResult && <p>Probability: {probabilityResult}%</p>} {/* Updated to display a single value */}
-    </div>
+        {probabilityResult && (
+          <p>
+            Probability: {probabilityResult}%<br />
+            Estimated Number of Individuals: {actualFigure.toLocaleString()}
+          </p>
+        )}
+      </div>
     </main>
   );
 }
