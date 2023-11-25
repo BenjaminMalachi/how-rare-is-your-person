@@ -28,6 +28,8 @@ This application uses data from the following API endpoints:
 - Handling the table data that was fetched from the API
 
 # Next Steps
+- 
+- Save feature
 - Add in more parameters to filter by
     - Household type
     - Area of residence
