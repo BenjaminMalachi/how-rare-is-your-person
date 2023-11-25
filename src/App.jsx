@@ -358,8 +358,8 @@ function App() {
       <div className="probability-result">
         {probabilityResult && (
           <p>
-            Probability: {probabilityResult}%<br />
-            Estimated Number of Individuals: {actualFigure.toLocaleString()}
+            You have a {probabilityResult}% chance of finding someone like that in Singapore<br />
+            Or roughly about: {actualFigure.toLocaleString()} individuals
           </p>
         )}
       </div>
