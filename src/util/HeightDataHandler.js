@@ -1,59 +1,39 @@
-const heightDistribution = {
-  male: {
-    '<152.88': 0.0013,
-    '152.88-159.12': 0.0214,
-    '159.12-165.38': 0.1359,
-    '165.38-177.88': 0.6827, // within 1 SD from the mean
-    '177.88-184.12': 0.1359,
-    '184.12-190.38': 0.0214,
-    '>190.38': 0.0013
-  },
-  female: {
-    '<145.00': 0.0013,
-    '145.00-150.00': 0.0214,
-    '150.00-155.00': 0.1359,
-    '155.00-165.00': 0.6827, // within 1 SD from the mean
-    '165.00-170.00': 0.1359,
-    '170.00-175.00': 0.0214,
-    '>175.00': 0.0013
-  }
-};
+  const heightDistribution = {
+    male: [
+      { max: 152.88, probability: 0.0013 },
+      { max: 159.12, probability: 0.0214 },
+      { max: 165.38, probability: 0.1359 },
+      { max: 177.88, probability: 0.6827 },
+      { max: 184.12, probability: 0.1359 },
+      { max: 190.38, probability: 0.0214 },
+      { max: Infinity, probability: 0.0013 }
+    ],
+    female: [
+      { max: 145.00, probability: 0.0013 },
+      { max: 150.00, probability: 0.0214 },
+      { max: 155.00, probability: 0.1359 },
+      { max: 160.00, probability: 0.6827 },
+      { max: 170.00, probability: 0.1359 },
+      { max: 175.00, probability: 0.0214 },
+      { max: Infinity, probability: 0.0013 }
+    ]
+  };
+    
+  export const calculateHeightProbability = (height, sex) => {
+    // Find the cumulative probability for a given sex
+    const calculateForSex = (sexHeightDistribution) => {
+      return sexHeightDistribution.reduce((cumulativeProb, { max, probability }) => {
+        return height <= max ? cumulativeProb + probability : cumulativeProb;
+      }, 0);
+    };
   
-export const calculateHeightProbability = (height, sex) => {
-  if (sex.toLowerCase() === 'doesnotmatter') {
-    // Calculate for both male and female, then take the average
-    const maleProbability = calculateProbabilityForSex(height, 'male');
-    const femaleProbability = calculateProbabilityForSex(height, 'female');
-    return (maleProbability + femaleProbability) / 2;
-  } else {
+    // Handle "does not matter" case by averaging male and female probabilities
+    if (sex.toLowerCase() === 'doesnotmatter') {
+      const maleProb = calculateForSex(heightDistribution.male);
+      const femaleProb = calculateForSex(heightDistribution.female);
+      return (maleProb + femaleProb) / 2;
+    }
+  
     // Calculate normally for a specific sex
-    return calculateProbabilityForSex(height, sex);
-  }
-};
-
-const calculateProbabilityForSex = (height, sex) => {
-  const brackets = heightDistribution[sex];
-  let cumulativeProbability = 0;
-
-  // Convert each range into a minimum and maximum number, then compare
-  for (const range in brackets) {
-    const probability = brackets[range];
-    let min, max;
-    if (range.startsWith('<')) {
-      min = Number.NEGATIVE_INFINITY;
-      max = parseFloat(range.slice(1));
-    } else if (range.startsWith('>')) {
-      min = parseFloat(range.slice(1));
-      max = Number.POSITIVE_INFINITY;
-    } else {
-      [min, max] = range.split('-').map(parseFloat);
-    }
-    // If height is within the range, add the probability
-    if (height > min && height <= max) {
-      cumulativeProbability += probability;
-      break; // Stop the loop if the height falls within a range
-    }
-  }
-
-  return cumulativeProbability;
-};
+    return calculateForSex(heightDistribution[sex]);
+  };
