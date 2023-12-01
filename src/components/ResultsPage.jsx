@@ -21,7 +21,6 @@ const ResultsPage = () => {
     <div>
       {records.map((record, index) => (
         <div key={index}>
-            <p>Age Range: {record.fields['Age Range']}</p>
             <p>Prefered Sex: {record.fields['Sex']}</p>
             <p>Min Height: {record.fields['Height']} cm</p>
             <p>Race: {Array.isArray(record.fields['Race']) ? record.fields['Race'].join(', ') : 'N/A'}</p>

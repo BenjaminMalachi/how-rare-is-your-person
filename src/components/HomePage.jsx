@@ -234,7 +234,7 @@ function HomePage() {
   //Airtable
 
   const handleSaveResults = async () => {
-
+    
     const selectedRaces = Object.keys(race).filter(key => race[key]).map(r => r.charAt(0).toUpperCase() + r.slice(1));
 
     const record = {
