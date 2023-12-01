@@ -234,17 +234,22 @@ function HomePage() {
   //Airtable
 
   const handleSaveResults = async () => {
+    
+    const selectedRaces = Object.keys(race).filter(key => race[key]).map(r => r.charAt(0).toUpperCase() + r.slice(1));
+
     const record = {
       fields: {
-        'Sex': sex,
+        'Sex': sex.charAt(0).toUpperCase() + sex.slice(1), // Capitalizing the first letter if needed
         'Age Range': `${ageRange[0]}-${ageRange[1]}`,
         'Height': height,
-        'Race': Object.keys(race).filter(key => race[key]),
+        'Race': selectedRaces,
         'Income': income,
-        'Probability Chance': parseFloat(probabilityResult),
+        'Probability Chance': parseFloat(probabilityResult)/100,
         'Estimated Individuals': parseInt(actualFigure, 10)
       }
     };
+
+    console.log("Sending record to Airtable:", record);
   
     try {
       const response = await axios.post(
@@ -313,6 +318,14 @@ function HomePage() {
 
   return (
     <main>
+      <header>
+        <h1>Delululator</h1>
+          <h2 className="disclaimer">
+            For all intents and purposes, the reason I created this calculator was to give my friends a reality check on their dating standards, the data used in this calculator is pulled straight from singstat.gov.sg
+            <br /><br />
+            The calculation for the probability is based on the general multiplication rule and is <strong>at best a guesstimate of the actual figure</strong>.
+          </h2>
+      </header>
       <RadioGroup
         label="Which Sex are you interested in?"
         name="sex"
@@ -377,7 +390,7 @@ function HomePage() {
       </div>
       <div className="App">
         <Slider
-          label="Select Yearly Income"
+          label="Select Min Yearly Income"
           min={20000}
           max={1000000}
           step={10000}

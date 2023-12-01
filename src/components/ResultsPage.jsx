@@ -21,17 +21,17 @@ const ResultsPage = () => {
     <div>
       {records.map((record, index) => (
         <div key={index}>
-            <p>Age Range: {record.fields['Age Range']}</p>
-            <p>Sex: {record.fields['Sex']}</p>
-            <p>Height: {record.fields['Height']}</p>
+            <p>Prefered Sex: {record.fields['Sex']}</p>
+            <p>Min Height: {record.fields['Height']} cm</p>
             <p>Race: {Array.isArray(record.fields['Race']) ? record.fields['Race'].join(', ') : 'N/A'}</p>
-            <p>Income: ${record.fields['Income']}</p>
-            <p>Probability Chance: {record.fields['Probability Chance']}%</p>
+            <p>Min Yearly Income: ${record.fields['Income']}</p>
+            <p>Probability Chance: {record.fields['Probability Chance']*100}%</p>
             <p>Estimated Individuals: {record.fields['Estimated Individuals']}</p>
         </div>
       ))}
     </div>
   );
+
 };
 
 export default ResultsPage;

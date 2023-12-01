@@ -3,33 +3,80 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #f0f0f0; /* Light grey text */
+  line-height: 1.6;
+  background-color: #121212; /* Very dark grey, almost black */
+  padding: 20px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+nav {
+  background: #1f1f1f; /* Slightly lighter grey for the nav bar */
+  color: #fff;
+  padding: 10px 20px;
+  margin-bottom: 20px;
 }
 
-.card {
-  padding: 2em;
+nav a {
+  color: #76b900; /* A soft green for links */
+  margin-right: 10px;
+  text-decoration: none;
 }
 
-.read-the-docs {
-  color: #888;
+nav a:hover {
+  color: #9ecd00; /* A lighter green for hover effect */
 }
 
 .App {
+  background: #1e1e1e; /* Dark grey for app sections */
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1); /* Shadow adjusted for dark mode */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 20vh; /* This makes sure that the .App div takes at least the height of the viewport */
+  min-height: 20vh;
+}
+
+.checkbox-container {
+  margin: 20px 0;
+}
+
+button {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background: #454545; /* Lighten the button background on hover */
+}
+
+.probability-result {
+  background: #262626; /* A shade darker than the app background for contrast */
+  color: #cfcfcf; /* Lighter text color for readability */
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  color: #76b900; /* Adjust the color to fit your dark theme */
+}
+
+.disclaimer {
+  color: #cfcfcf; /* Light grey for readability */
+  font-size: 0.9em;
 }
