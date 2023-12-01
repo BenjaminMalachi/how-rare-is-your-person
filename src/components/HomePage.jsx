@@ -7,6 +7,7 @@ import { calculateDemographicProbability, calculateIncomeProbability, calculateC
 import { findAllMatchingAgeCategories, ageCategoryMapping } from '../util/AgeSexRaceDataHandler';
 import { findIncomeCategory } from '../util/IncomeDataHandler';
 import { calculateHeightProbability } from '../util/HeightDataHandler';
+import { airtableConfig } from '../util/airtable.config';
 import axios from 'axios';
 
 function HomePage() {
@@ -53,6 +54,8 @@ function HomePage() {
   const [size, setSize] = useState(2); // Default size, visible only if male is selected
   const [probabilityResult, setProbabilityResult] = useState("");
   const [actualFigure, setActualFigure] = useState(0);
+  const [records, setRecords] = useState([]);
+
 
   // ... Rest of the component with functions to handle changes, submit, etc.
 
@@ -228,6 +231,44 @@ function HomePage() {
     return parsedData;
   }
 
+  //Airtable
+
+  const handleSaveResults = async () => {
+
+    const selectedRaces = Object.keys(race).filter(key => race[key]).map(r => r.charAt(0).toUpperCase() + r.slice(1));
+
+    const record = {
+      fields: {
+        'Sex': sex.charAt(0).toUpperCase() + sex.slice(1), // Capitalizing the first letter if needed
+        'Age Range': `${ageRange[0]}-${ageRange[1]}`,
+        'Height': height,
+        'Race': selectedRaces,
+        'Income': income,
+        'Probability Chance': parseFloat(probabilityResult)/100,
+        'Estimated Individuals': parseInt(actualFigure, 10)
+      }
+    };
+
+    console.log("Sending record to Airtable:", record);
+  
+    try {
+      const response = await axios.post(
+        `https://api.airtable.com/v0/${airtableConfig.baseId}/${airtableConfig.tableName}`,
+        record,
+        {
+          headers: {
+            'Authorization': `Bearer ${airtableConfig.apiKey}`,
+            'Content-Type': 'application/json'
+          }
+      });
+      if (response.status === 200) {
+        console.log('Record saved');
+      }
+    } catch (error) {
+      console.error('Error saving record:', error);
+    }
+  };
+
   // Axios
 
   const [data, setData] = useState(null);
@@ -277,6 +318,14 @@ function HomePage() {
 
   return (
     <main>
+      <header>
+        <h1>Delululator</h1>
+          <h2 className="disclaimer">
+            For all intents and purposes, the reason I created this calculator was to give my friends a reality check on their dating standards, the data used in this calculator is pulled straight from singstat.gov.sg
+            <br /><br />
+            The calculation for the probability is based on the general multiplication rule and is <strong>at best a guesstimate of the actual figure</strong>.
+          </h2>
+      </header>
       <RadioGroup
         label="Which Sex are you interested in?"
         name="sex"
@@ -341,7 +390,7 @@ function HomePage() {
       </div>
       <div className="App">
         <Slider
-          label="Select Yearly Income"
+          label="Select Min Yearly Income"
           min={20000}
           max={1000000}
           step={10000}
@@ -359,6 +408,7 @@ function HomePage() {
           </p>
         )}
       </div>
+      <button onClick={handleSaveResults}>Save Results</button>
     </main>
   );
 
