@@ -7,6 +7,7 @@ import { calculateDemographicProbability, calculateIncomeProbability, calculateC
 import { findAllMatchingAgeCategories, ageCategoryMapping } from '../util/AgeSexRaceDataHandler';
 import { findIncomeCategory } from '../util/IncomeDataHandler';
 import { calculateHeightProbability } from '../util/HeightDataHandler';
+import { airtableConfig } from '../util/airtable.config';
 import axios from 'axios';
 
 function HomePage() {
@@ -53,6 +54,8 @@ function HomePage() {
   const [size, setSize] = useState(2); // Default size, visible only if male is selected
   const [probabilityResult, setProbabilityResult] = useState("");
   const [actualFigure, setActualFigure] = useState(0);
+  const [records, setRecords] = useState([]);
+
 
   // ... Rest of the component with functions to handle changes, submit, etc.
 
@@ -228,6 +231,39 @@ function HomePage() {
     return parsedData;
   }
 
+  //Airtable
+
+  const handleSaveResults = async () => {
+    const record = {
+      fields: {
+        'Sex': sex,
+        'Age Range': `${ageRange[0]}-${ageRange[1]}`,
+        'Height': height,
+        'Race': Object.keys(race).filter(key => race[key]),
+        'Income': income,
+        'Probability Chance': parseFloat(probabilityResult),
+        'Estimated Individuals': parseInt(actualFigure, 10)
+      }
+    };
+  
+    try {
+      const response = await axios.post(
+        `https://api.airtable.com/v0/${airtableConfig.baseId}/${airtableConfig.tableName}`,
+        record,
+        {
+          headers: {
+            'Authorization': `Bearer ${airtableConfig.apiKey}`,
+            'Content-Type': 'application/json'
+          }
+      });
+      if (response.status === 200) {
+        console.log('Record saved');
+      }
+    } catch (error) {
+      console.error('Error saving record:', error);
+    }
+  };
+
   // Axios
 
   const [data, setData] = useState(null);
@@ -359,6 +395,7 @@ function HomePage() {
           </p>
         )}
       </div>
+      <button onClick={handleSaveResults}>Save Results</button>
     </main>
   );
 
